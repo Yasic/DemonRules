@@ -23,7 +23,6 @@ class NeuralNetwork(object):
             cnn.downstream_node.append_upstream(cnn)
             cnn.upstream_node.append_downstream(cnn)
             self.connections.append(cnn)
-        print self.get_weight()
 
     def train(self, datas, labels, rate, duration):
         for i in range(duration):
@@ -31,12 +30,13 @@ class NeuralNetwork(object):
                 self.predict(datas[j])
                 self.calculate_delta(labels[j])
                 self.update_weight(rate)
-        print self.get_weight()
+                self.get_weight()
 
     def predict(self, sample):
         self.layers[0].set_output(sample)
         for i in range(1, len(self.layers)):
             self.layers[i].calculate_output()
+        return map(lambda node: node.output, self.layers[-1].nodes[:-1])
 
     def calculate_delta(self, label):
         output_nodes = self.layers[-1].nodes
@@ -56,10 +56,21 @@ class NeuralNetwork(object):
         self.layers[0].set_output(data)
         for i in range(1, len(self.layers)):
             self.layers[i].calculate_output()
-        print self.layers[len(self.layers) - 1].nodes[0].output
+        print 'TestOutput: %f' % self.layers[-1].nodes[0].output
 
     def get_weight(self):
         for item in self.connections:
-            print '%u-%u:%u-%u:%f' % (
+            print 'weight\t%u-%u:%u-%u:%f' % (
                 item.upstream_node.layer_index, item.upstream_node.node_index, item.downstream_node.layer_index,
                 item.downstream_node.node_index, item.weight)
+        print ''
+
+    def calculate_gradient_of_connections(self):
+        for item in self.connections:
+            item.calculate_gradient()
+
+    def get_gradient_of_one_sample(self, sample, label):
+        self.predict(sample)
+        self.calculate_delta(label)
+        self.calculate_gradient_of_connections()
+

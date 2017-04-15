@@ -10,6 +10,9 @@ class ConstNode(object):
     def calculate_hidden_layer_delta(self):
         self.delta = self.output * (1 - self.output) * reduce(
             lambda ret, cnn: ret + cnn.downstream_node.delta * cnn.weight, self.downstream, 0.0)
+        print 'NodeIndex:%d-%d NodeDelta:%f NodeOutput:%f' % (
+            self.layer_index, self.node_index, self.delta, self.output)
+        print ''
 
     def calculate_output(self):
         self.output = 1
